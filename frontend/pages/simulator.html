@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>What-If Simulator — FinAlly Student</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=Lora:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/global.css" /><link rel="stylesheet" href="../css/pages.css" />
+</head>
+<body>
+  
+  <div class="app-layout">
+    <aside class="sidebar" id="sidebar"></aside>
+    <main class="main-content">
+      <div class="page-header">
+        <div><h1 class="page-title">What-If Simulator</h1><p class="page-subtitle">Model financial changes — read-only, nothing is saved.</p></div>
+      </div>
+      <div class="alert alert-info" style="margin-bottom:24px;">
+        🔮 All simulations are read-only. Your real budget, score, and transactions are not affected.
+      </div>
+      <div class="simulator-layout">
+        <!-- Left: scenario selector + inputs -->
+        <div>
+          <div class="card" style="margin-bottom:20px;">
+            <h3 style="margin-bottom:16px;font-family:var(--font-display);">Choose Scenario</h3>
+            <div class="scenario-selector" id="scenarioSelector">
+              <button class="scenario-btn active" data-scenario="income_drop">💸 Income Drop</button>
+              <button class="scenario-btn" data-scenario="new_expense">📦 New Monthly Expense / EMI</button>
+              <button class="scenario-btn" data-scenario="job_loss">😰 Job / Allowance Loss</button>
+              <button class="scenario-btn" data-scenario="new_goal">🎯 Add New Savings Goal</button>
+            </div>
+          </div>
+
+          <div class="card" id="simInputCard">
+            <h3 style="margin-bottom:16px;font-family:var(--font-display);">Scenario Inputs</h3>
+            <div id="simInputs" style="display:flex;flex-direction:column;gap:16px;"></div>
+            <button class="btn btn-primary" id="runSimBtn" style="width:100%;justify-content:center;margin-top:20px;">
+              🔮 Run Simulation
+            </button>
+          </div>
+        </div>
+
+        <!-- Right: results -->
+        <div>
+          <div class="sim-result-card" id="simResults" style="display:none;">
+            <div class="sim-result-title">Simulation Results</div>
+            <div class="sim-stat-grid" id="simStatGrid"></div>
+            <div class="divider"></div>
+            <div id="simInsights" style="display:flex;flex-direction:column;gap:10px;"></div>
+            <div class="sim-note">These are projections only. Run another scenario or go back to your real dashboard.</div>
+          </div>
+          <div id="simPlaceholder" class="card" style="text-align:center;padding:60px 24px;">
+            <div style="font-size:3rem;margin-bottom:16px;">🔮</div>
+            <div style="font-family:var(--font-display);font-weight:700;margin-bottom:8px;">Ready to simulate</div>
+            <p>Choose a scenario on the left and run the simulation to see projected outcomes.</p>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+  <div class="toast-container" id="toastContainer"></div>
+  <script src="../js/utils/api.js"></script><script src="../js/utils/toast.js"></script>
+  <script src="../js/utils/storage.js"></script><script src="../js/utils/helpers.js"></script>
+  <script src="../js/modules/sidebar.js"></script><script src="../js/modules/simulator.js"></script>
+  <script>SidebarModule.render('simulator'); SimulatorModule.init();</script>
+</body>
+</html>

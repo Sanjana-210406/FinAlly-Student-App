@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Budget — FinAlly Student</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=Lora:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/global.css" /><link rel="stylesheet" href="../css/pages.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  
+  <div class="app-layout">
+    <aside class="sidebar" id="sidebar"></aside>
+    <main class="main-content">
+      <div class="page-header">
+        <div><h1 class="page-title">Budget Breakdown</h1><p class="page-subtitle">Budget vs. actual spend this month.</p></div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <select class="form-select" id="budgetMonth" style="max-width:160px;"></select>
+        </div>
+      </div>
+
+      <!-- Summary cards -->
+      <div class="grid-4" style="margin-bottom:24px;" id="budgetSummaryCards"></div>
+
+      <!-- Bar chart -->
+      <div class="card" style="margin-bottom:24px;">
+        <div class="section-header"><h3 class="section-title">Category vs. Budget</h3></div>
+        <canvas id="budgetBarChart" height="200"></canvas>
+      </div>
+
+      <!-- Predictive forecast -->
+      <div class="card" style="margin-bottom:24px;">
+        <div class="section-header">
+          <h3 class="section-title">📊 Month-End Predictions</h3>
+          <span style="font-size:0.8rem;color:var(--clr-muted);">Based on current daily spend rate</span>
+        </div>
+        <div id="forecastTable"></div>
+      </div>
+
+      <!-- Monthly safety summary -->
+      <div class="card" id="monthlySummaryCard">
+        <div class="section-header"><h3 class="section-title">Monthly Safety Summary</h3></div>
+        <div id="monthlySummary"></div>
+      </div>
+    </main>
+  </div>
+  <div class="toast-container" id="toastContainer"></div>
+  <script src="../js/utils/api.js"></script><script src="../js/utils/toast.js"></script>
+  <script src="../js/utils/storage.js"></script><script src="../js/utils/helpers.js"></script>
+  <script src="../js/modules/sidebar.js"></script><script src="../js/modules/budget.js"></script>
+  <script>SidebarModule.render('budget'); BudgetModule.init();</script>
+</body>
+</html>

@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+</head>
+<body>
+  <div id="output">Loading...</div>
+  <script>
+    const Helpers = { todayStr: () => '2026-04-11' };
+
+  function parseHeuristics(rawText) {
+    const lines = rawText.split('\n').map(l => l.trim()).filter(Boolean);
+    const transactions = [];
+    const today = Helpers.todayStr();
+
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+
+      // Regex to hunt for currency or standalone floating points often found in receipts
+      // Includes [z?] to catch common Tesseract misreads for the Indian Rupee symbol
+      const amtMatch = line.match(/(?:[₹$£]|rs\.?|paid|amount|total|-|[z?])?\s*(\d+(?:,\d{3})*(?:\.\d{2})?)/i);
+      
+      if (amtMatch) {
+        const amtStr = amtMatch[1].replace(/,/g, '');
+        const amt = parseFloat(amtStr);
+
+        const isJustNumber = /^[^a-zA-Z\d]*\d+[\d,]*(\.\d+)?\s*$/.test(line);
+        const hasCurrencySymbol = /(?:[₹$£]|rs\.?|paid)/i.test(line);
+
+        if (amt > 0 && (hasCurrencySymbol || line.includes('.') || isJustNumber)) {
+          
+          let desc = "";
+          const candidateLines = [];
+          
+          for (let j = Math.max(0, i - 3); j <= Math.min(lines.length - 1, i + 3); j++) {
+            if (j === i) continue;
+            let cLine = lines[j];
+            
+            if (/sep|oct|nov|dec|jan|feb|mar|apr|may|jun|jul|aug|am|pm|\d{2,4}/i.test(cLine) && /\d/.test(cLine)) {
+                continue;
+            }
+            if (/banking name|upi id|transaction id|paid to|sent to/i.test(cLine)) {
+                const bNameMatch = cLine.match(/banking name:?\s*(.*)/i);
+                if (bNameMatch && bNameMatch[1].trim()) {
+                    candidateLines.unshift(bNameMatch[1].trim());
+                }
+                continue;
+            }
+            if (!/\d{3,}/.test(cLine) && cLine.length > 2) {
+                candidateLines.push(cLine);
+            }
+          }
+          
+          if (candidateLines.length > 0) {
+             desc = candidateLines[0];
+          } else {
+             const strippedLine = line.replace(amtMatch[0], '').trim();
+             if (strippedLine.length > 2 && !/^[\d:\-\/]+$/.test(strippedLine)) {
+                desc = strippedLine;
+             }
+          }
+
+          // Clean out annoying OCR artifacts from merchant names
+          desc = desc.replace(/[^a-zA-Z0-9\s&*]/g, '').slice(0, 50).trim() || 'Unknown Scanned Merchant';
+
+          transactions.push({
+            date: today,
+            description: desc,
+            amount: amt
+          });
+        }
+      }
+    }
+
+    const uniqueTxns = [];
+    const seen = new Set();
+    for (const t of transactions) {
+      const key = `${t.amount}-${t.description.toLowerCase()}`;
+      if (!seen.has(key)) {
+        seen.add(key);
+        uniqueTxns.push(t);
+      }
+    }
+
+    return uniqueTxns.slice(0, 20);
+  }
+
+
+    async function run() {
+      try {
+        const worker = await Tesseract.createWorker('eng');
+        const resp = await fetch('img5.png');
+        const blob = await resp.blob();
+        if (blob.size === 0) {
+            document.getElementById('output').innerText = "Blob size 0";
+            return;
+        }
+        const { data: { text } } = await worker.recognize(blob);
+        console.log(text);
+        const results = parseHeuristics(text);
+        document.getElementById('output').innerText = "RESULTS: " + JSON.stringify(results, null, 2);
+      } catch (err) {
+        document.getElementById('output').innerText = "ERROR " + err.message;
+      }
+    }
+    run();
+  </script>
+</body>
+</html>

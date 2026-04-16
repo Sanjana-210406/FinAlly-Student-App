@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Privacy — FinAlly Student</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=Lora:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/global.css" /><link rel="stylesheet" href="../css/pages.css" />
+</head>
+<body>
+  
+  <div class="app-layout">
+    <aside class="sidebar" id="sidebar"></aside>
+    <main class="main-content" style="max-width:720px;">
+      <div class="page-header">
+        <div><h1 class="page-title">🔐 Data Privacy</h1><p class="page-subtitle">How we handle your data — plain language, no legal jargon.</p></div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:20px;">
+        <div class="card">
+          <div style="display:flex;gap:14px;align-items:flex-start;">
+            <span style="font-size:2rem;">🔒</span>
+            <div>
+              <h3 style="margin-bottom:8px;">Your password is hashed, not stored</h3>
+              <p>We use BCrypt to hash your password before saving it. Even we cannot see your actual password. If you forget it, we can only reset it — never retrieve it. This is the correct, secure behavior.</p>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div style="display:flex;gap:14px;align-items:flex-start;">
+            <span style="font-size:2rem;">👤</span>
+            <div>
+              <h3 style="margin-bottom:8px;">Only you see your data</h3>
+              <p>Every API request is authenticated with a JWT token that expires after 24 hours. The server verifies this token on every request. It is architecturally impossible for another user to view your expenses, goals, or behavioral data.</p>
+            </div>
+          </div>
+        </div>
+        <div class="card" style="border-color:rgba(0,229,160,0.3);">
+          <div style="display:flex;gap:14px;align-items:flex-start;">
+            <span style="font-size:2rem;">🚫</span>
+            <div>
+              <h3 style="margin-bottom:8px;">We never ask for your bank credentials</h3>
+              <p>FinAlly never requests, stores, or handles:</p>
+              <ul style="list-style:none;margin-top:12px;display:flex;flex-direction:column;gap:8px;">
+                <li style="display:flex;gap:8px;align-items:center;font-size:0.88rem;"><span style="color:var(--clr-accent);">✓</span> Bank account numbers</li>
+                <li style="display:flex;gap:8px;align-items:center;font-size:0.88rem;"><span style="color:var(--clr-accent);">✓</span> Debit or credit card numbers</li>
+                <li style="display:flex;gap:8px;align-items:center;font-size:0.88rem;"><span style="color:var(--clr-accent);">✓</span> UPI PINs or net banking passwords</li>
+                <li style="display:flex;gap:8px;align-items:center;font-size:0.88rem;"><span style="color:var(--clr-accent);">✓</span> OTPs of any kind</li>
+              </ul>
+              <p style="margin-top:12px;">All transactions are entered manually by you.</p>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div style="display:flex;gap:14px;align-items:flex-start;">
+            <span style="font-size:2rem;">🧠</span>
+            <div>
+              <h3 style="margin-bottom:8px;">Behavioral data is yours alone</h3>
+              <p>Spending patterns, emotional spend flags, gamification records, and behavioral insights are stored exclusively for your benefit. This data is never shared, aggregated across users, or used for advertising. It powers only your personal Behavioral Bot insights.</p>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div style="display:flex;gap:14px;align-items:flex-start;">
+            <span style="font-size:2rem;">🎓</span>
+            <div>
+              <h3 style="margin-bottom:8px;">Gender & age are for personalization only</h3>
+              <p>Your gender and age are used solely to personalize the tone and content of the Behavioral Bot's messages. A 17-year-old receives different guidance than a 25-year-old. This data is never shared or used for any purpose outside your personal experience.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+  <div class="toast-container" id="toastContainer"></div>
+  <script src="../js/utils/api.js"></script><script src="../js/utils/storage.js"></script>
+  <script src="../js/modules/sidebar.js"></script>
+  <script>SidebarModule.render('privacy');</script>
+</body>
+</html>

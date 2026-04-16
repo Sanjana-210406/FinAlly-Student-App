@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sign In — FinAlly Student</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=Lora:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/global.css" />
+  <link rel="stylesheet" href="../css/auth.css" />
+</head>
+<body>
+  <div class="auth-page">
+    <div class="auth-left">
+      <div class="auth-brand-left">
+        <span class="auth-brand-fin">Fin</span><span class="auth-brand-ally">Ally</span>
+      </div>
+      <div class="auth-left-mid">
+        <h1 class="auth-left-tagline">
+          Your money,<br><em>finally</em><br>under control.
+        </h1>
+        <p class="auth-left-desc">AI-powered budget tracking, behavioral insights, and savings goals — built for students.</p>
+      </div>
+      <div class="auth-features">
+        <div class="auth-feature">
+          <div class="auth-feature-dot"></div>
+          <div>
+            <div class="auth-feature-title">Behavioral Bot</div>
+            <div class="auth-feature-desc">Your AI mentor that adapts to your age and gender — personalized guidance, always.</div>
+          </div>
+        </div>
+        <div class="auth-feature">
+          <div class="auth-feature-dot"></div>
+          <div>
+            <div class="auth-feature-title">Savings-First Budgeting</div>
+            <div class="auth-feature-desc">Lock your savings before spending begins. 10% saved automatically every month.</div>
+          </div>
+        </div>
+        <div class="auth-feature">
+          <div class="auth-feature-dot"></div>
+          <div>
+            <div class="auth-feature-title">Streaks & Badges</div>
+            <div class="auth-feature-desc">Earn achievements for good habits. Financial discipline made rewarding.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="auth-right">
+      <div class="auth-form-wrap">
+        <div class="page-eyebrow">Welcome back</div>
+        <h2 class="auth-form-title">Sign in to FinAlly</h2>
+        <p class="auth-form-sub">New here? <a href="register.html">Create a free account →</a></p>
+
+        <form class="auth-form" id="loginForm" novalidate>
+          <div class="form-group">
+            <label class="form-label" for="loginEmail">Email address</label>
+            <input class="form-input" id="loginEmail" type="email" placeholder="you@college.edu" autocomplete="email" required />
+            <span class="form-error-msg" id="emailError">Enter a valid email address.</span>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="loginPassword">Password</label>
+            <input class="form-input" id="loginPassword" type="password" placeholder="Your password" autocomplete="current-password" required />
+            <span class="form-error-msg" id="passwordError">Password is required.</span>
+          </div>
+          <div style="display:flex;justify-content:flex-end;">
+            <a href="#" style="font-size:0.78rem;color:var(--green);font-weight:600;">Forgot password?</a>
+          </div>
+          <button class="btn btn-primary btn-lg" type="submit" id="loginBtn" style="width:100%;justify-content:center;">
+            <span id="loginBtnText">Sign In</span>
+            <span id="loginSpinner" class="spinner hidden" style="width:16px;height:16px;border-width:2px;border-color:rgba(255,255,255,0.3);border-top-color:#fff;"></span>
+          </button>
+          <div id="loginError" class="alert alert-danger hidden"></div>
+        </form>
+
+        <div class="auth-divider" style="margin:24px 0;">or</div>
+        <button class="btn btn-secondary" id="demoBtn" style="width:100%;justify-content:center;">
+          Try Demo Account
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-container" id="toastContainer"></div>
+  <script src="../js/utils/api.js"></script>
+  <script src="../js/utils/toast.js"></script>
+  <script src="../js/utils/storage.js"></script>
+  <script src="../js/modules/auth.js"></script>
+  <script>
+    if (StorageUtil.getToken()) window.location.href = 'dashboard.html';
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      await AuthModule.login(
+        document.getElementById('loginEmail').value.trim(),
+        document.getElementById('loginPassword').value
+      );
+    });
+    document.getElementById('demoBtn').addEventListener('click', () => AuthModule.loginDemo());
+  </script>
+</body>
+</html>

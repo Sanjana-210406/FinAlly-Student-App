@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+</head>
+<body>
+  <div id="output">Loading...</div>
+  <script>
+    async function test() {
+      try {
+        const worker = await Tesseract.createWorker('eng', 1, {
+          logger: m => console.log(m.status)
+        });
+        console.log("Worker created successfully");
+        const resp = await fetch('http://localhost:8000/payment_confirmation.png');
+        const blob = await resp.blob();
+        const { data: { text } } = await worker.recognize(blob);
+        document.getElementById('output').innerText = text;
+        console.log("RAW TEXT:", text);
+      } catch (err) {
+        console.error("OCR Error:", err);
+        document.getElementById('output').innerText = "ERROR: " + err.message;
+      }
+    }
+    test();
+  </script>
+</body>
+</html>

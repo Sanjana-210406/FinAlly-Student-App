@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Alerts — FinAlly Student</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=Lora:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/global.css" /><link rel="stylesheet" href="../css/pages.css" />
+</head>
+<body>
+  
+  <div class="app-layout">
+    <aside class="sidebar" id="sidebar"></aside>
+    <main class="main-content">
+      <div class="page-header">
+        <div><h1 class="page-title">Alerts</h1><p class="page-subtitle">Your financial notifications and bot messages.</p></div>
+        <button class="btn btn-outline btn-sm" id="markAllReadBtn">Mark all read</button>
+      </div>
+      <div class="filter-bar" style="margin-bottom:20px;">
+        <select class="form-select" id="alertTypeFilter" style="max-width:200px;">
+          <option value="">All Types</option>
+          <option value="BEHAVIORAL_BOT">🤖 Bot Messages</option>
+          <option value="WARNING">⚠️ Warnings</option>
+          <option value="DANGER">🔴 Danger</option>
+          <option value="PREDICTIVE">📊 Predictive</option>
+          <option value="SUBSCRIPTION_LEAK">🔄 Subscriptions</option>
+          <option value="EMOTIONAL_SPEND">💭 Emotional</option>
+          <option value="ANOMALY">📈 Anomaly</option>
+          <option value="GOAL_DEADLINE">🎯 Goal Deadline</option>
+        </select>
+        <label style="display:flex;align-items:center;gap:6px;font-size:0.85rem;color:var(--clr-muted);">
+          <input type="checkbox" id="unreadOnly" /> Unread only
+        </label>
+      </div>
+      <div class="alerts-list" id="alertsList">
+        <div class="flex-center" style="padding:60px;"><div class="spinner" style="width:36px;height:36px;border-width:4px;"></div></div>
+      </div>
+    </main>
+  </div>
+  <div class="toast-container" id="toastContainer"></div>
+  <script src="../js/utils/api.js"></script><script src="../js/utils/toast.js"></script>
+  <script src="../js/utils/storage.js"></script><script src="../js/utils/helpers.js"></script>
+  <script src="../js/modules/sidebar.js"></script><script src="../js/modules/alerts.js"></script>
+  <script>SidebarModule.render('alerts'); AlertsModule.init();</script>
+</body>
+</html>

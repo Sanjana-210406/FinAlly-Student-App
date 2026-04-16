@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Register — FinAlly Student</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=Lora:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/global.css" />
+  <link rel="stylesheet" href="../css/auth.css" />
+</head>
+<body>
+  
+
+  <div class="auth-page">
+    <!-- Left branding panel -->
+    <div class="auth-left">
+      <div class="auth-brand">
+        <span class="auth-brand-icon">◈</span>
+        <div>
+          <div class="auth-brand-text">FinAlly</div>
+          <div class="auth-brand-sub">Student Edition</div>
+        </div>
+      </div>
+
+      <div class="auth-left-content">
+        <h1 class="auth-tagline">
+          Start your<br />
+          <span>financial journey.</span>
+        </h1>
+        <p class="auth-tagline-sub">
+          Create your free account in under 2 minutes. Your AI mentor is waiting.
+        </p>
+      </div>
+
+      <div class="auth-features">
+        <div class="auth-feature-item">
+          <span class="auth-feature-icon">⚡</span>
+          <div class="auth-feature-text">
+            <strong>Auto Budget</strong> — savings-first allocation generated instantly
+          </div>
+        </div>
+        <div class="auth-feature-item">
+          <span class="auth-feature-icon">🔐</span>
+          <div class="auth-feature-text">
+            <strong>Secure by design</strong> — BCrypt hashed, JWT auth, zero bank data
+          </div>
+        </div>
+        <div class="auth-feature-item">
+          <span class="auth-feature-icon">🧠</span>
+          <div class="auth-feature-text">
+            <strong>Personalized AI</strong> — bot adapts to your age, gender & habits
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right form panel -->
+    <div class="auth-right">
+      <div class="auth-form-container" style="max-width:460px;">
+        <h2 class="auth-form-title">Create account</h2>
+        <p class="auth-form-sub">
+          Already have one? <a href="login.html">Sign in →</a>
+        </p>
+
+        <!-- Step indicator -->
+        <div class="step-indicator" id="stepIndicator">
+          <div class="step-dot active" id="stepDot1">1</div>
+          <div class="step-line" id="stepLine1"></div>
+          <div class="step-dot" id="stepDot2">2</div>
+          <div class="step-line" id="stepLine2"></div>
+          <div class="step-dot" id="stepDot3">3</div>
+        </div>
+
+        <form id="registerForm" novalidate>
+
+          <!-- ── Step 1: Credentials ── -->
+          <div class="step-panel active" id="step1">
+            <div class="step-title">Account Details</div>
+
+            <div class="form-group">
+              <label class="form-label" for="regName">Full Name</label>
+              <input class="form-input" id="regName" type="text" placeholder="Riya Sharma" required />
+              <span class="form-error-msg" id="nameError">Please enter your name.</span>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="regEmail">College Email</label>
+              <input class="form-input" id="regEmail" type="email" placeholder="you@college.edu" required />
+              <span class="form-error-msg" id="regEmailError">Enter a valid email.</span>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="regPassword">Password</label>
+              <input class="form-input" id="regPassword" type="password" placeholder="Min 8 characters" required />
+              <span class="form-error-msg" id="regPasswordError">Password must be at least 8 characters.</span>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="regConfirmPassword">Confirm Password</label>
+              <input class="form-input" id="regConfirmPassword" type="password" placeholder="Repeat password" required />
+              <span class="form-error-msg" id="confirmPasswordError">Passwords do not match.</span>
+            </div>
+
+            <button type="button" class="btn btn-primary" id="step1Next" style="width:100%;justify-content:center;">
+              Continue →
+            </button>
+          </div>
+
+          <!-- ── Step 2: Personal Profile ── -->
+          <div class="step-panel" id="step2">
+            <div class="step-title">Your Profile</div>
+            <p style="font-size:0.83rem;color:var(--clr-muted);margin-bottom:4px;">
+              This helps the AI bot personalize advice and tone for you.
+            </p>
+
+            <div class="form-group">
+              <label class="form-label">Gender</label>
+              <div class="gender-pills" id="genderPills">
+                <div class="gender-pill" data-value="MALE">👨 Male</div>
+                <div class="gender-pill" data-value="FEMALE">👩 Female</div>
+                <div class="gender-pill" data-value="OTHER">🧑 Other</div>
+              </div>
+              <span class="form-error-msg" id="genderError">Please select your gender.</span>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="regAge">Age</label>
+              <input class="form-input" id="regAge" type="number" placeholder="e.g. 20" min="15" max="30" required />
+              <span class="form-error-msg" id="ageError">Enter a valid age between 15 and 30.</span>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="regCollege">College / Institution</label>
+              <input class="form-input" id="regCollege" type="text" placeholder="JNTU, VIT, IIT Bombay..." />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="regYear">Year of Study</label>
+              <select class="form-select" id="regYear">
+                <option value="">Select year</option>
+                <option value="1">1st Year</option>
+                <option value="2">2nd Year</option>
+                <option value="3">3rd Year</option>
+                <option value="4">4th Year</option>
+                <option value="PG">Post Graduate</option>
+              </select>
+            </div>
+
+            <div style="display:flex;gap:12px;">
+              <button type="button" class="btn btn-outline" id="step2Back" style="flex:1;justify-content:center;">← Back</button>
+              <button type="button" class="btn btn-primary" id="step2Next" style="flex:2;justify-content:center;">Continue →</button>
+            </div>
+          </div>
+
+          <!-- ── Step 3: Financial Setup ── -->
+          <div class="step-panel" id="step3">
+            <div class="step-title">Financial Setup</div>
+            <p style="font-size:0.83rem;color:var(--clr-muted);margin-bottom:4px;">
+              Set up your income and savings goal to get started.
+            </p>
+
+            <div class="form-group">
+              <label class="form-label" for="regIncome">Monthly Income (₹)</label>
+              <input class="form-input" id="regIncome" type="number" placeholder="e.g. 8000 (pocket money / stipend)" min="500" required />
+              <span class="form-error-msg" id="incomeError">Please enter a valid monthly income.</span>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="regIncomeSource">Income Source</label>
+              <select class="form-select" id="regIncomeSource">
+                <option value="POCKET_MONEY">Pocket Money from Parents</option>
+                <option value="PART_TIME">Part-time Job / Freelance</option>
+                <option value="SCHOLARSHIP">Scholarship / Stipend</option>
+                <option value="OTHER">Other</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="regYearlyGoal">Yearly Savings Goal (₹) — Optional</label>
+              <input class="form-input" id="regYearlyGoal" type="number" placeholder="e.g. 24000" />
+            </div>
+
+            <!-- Budget preview -->
+            <div id="budgetPreview" class="card" style="display:none; padding:16px;">
+              <div style="font-family:var(--font-display);font-size:0.78rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--clr-muted);margin-bottom:12px;">
+                Budget Preview
+              </div>
+              <div id="budgetBreakdown"></div>
+            </div>
+
+            <div style="display:flex;gap:12px;">
+              <button type="button" class="btn btn-outline" id="step3Back" style="flex:1;justify-content:center;">← Back</button>
+              <button type="button" class="btn btn-accent btn-lg" id="submitBtn" style="flex:2;justify-content:center;">
+                <span id="submitText">🚀 Create Account</span>
+                <span id="submitSpinner" class="spinner hidden" style="width:18px;height:18px;border-width:2px;"></span>
+              </button>
+            </div>
+
+            <div id="registerError" class="alert alert-danger hidden" style="margin-top:4px;"></div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script src="../js/utils/api.js"></script>
+  <script src="../js/utils/toast.js"></script>
+  <script src="../js/utils/storage.js"></script>
+  <script src="../js/modules/auth.js"></script>
+  <script src="../js/modules/register.js"></script>
+</body>
+</html>

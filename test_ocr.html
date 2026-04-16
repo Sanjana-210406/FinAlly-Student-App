@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+</head>
+<body>
+  <script>
+    async function test() {
+      try {
+        const worker = await Tesseract.createWorker('eng', 1, {
+          logger: m => console.log(m.status)
+        });
+        console.log("Worker created successfully");
+        document.body.innerHTML = "SUCCESS";
+      } catch (err) {
+        console.error("OCR Error:", err);
+        document.body.innerHTML = "ERROR: " + err.message;
+      }
+    }
+    test();
+  </script>
+</body>
+</html>

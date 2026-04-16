@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard — FinAlly Student</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=Lora:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/global.css" />
+  <link rel="stylesheet" href="../css/dashboard.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <div class="app-layout">
+    <aside class="sidebar" id="sidebar"></aside>
+
+    <main class="main-content">
+      <!-- Greeting -->
+      <div class="greeting-row">
+        <div>
+          <div class="greeting-label">Overview</div>
+          <h1 class="greeting-title" id="greetingTitle">Good morning</h1>
+          <div class="greeting-date" id="greetingDate"></div>
+        </div>
+        <a href="add-expense.html" class="btn btn-primary">+ Add Expense</a>
+      </div>
+
+      <!-- Score + Bot -->
+      <div class="top-row">
+        <div class="score-card">
+          <div class="score-card-label">Financial Health Score</div>
+          <div class="score-ring-wrap">
+            <svg viewBox="0 0 100 100">
+              <circle class="ring-track" cx="50" cy="50" r="42"/>
+              <circle class="ring-fill" id="scoreRing" cx="50" cy="50" r="42"
+                stroke-dasharray="264" stroke-dashoffset="264"/>
+            </svg>
+            <div class="score-center">
+              <div class="score-num" id="scoreNum">—</div>
+              <div class="score-out">/ 100</div>
+            </div>
+          </div>
+          <div class="score-rating" id="scoreRating">Calculating…</div>
+          <div class="score-components" id="scoreComponents"></div>
+        </div>
+
+        <div class="bot-card">
+          <div class="bot-card-top">
+            <div class="bot-avatar">🤖</div>
+            <div style="flex:1;">
+              <div class="bot-header">
+                <span class="bot-name">FinAlly Bot</span>
+                <span class="bot-time" id="botTime">just now</span>
+              </div>
+              <p class="bot-message" id="botMessage">Loading your personalized insights…</p>
+            </div>
+          </div>
+          <div class="bot-actions">
+            <a href="insights.html" class="btn btn-secondary btn-sm">View Insights</a>
+            <a href="alerts.html" class="btn btn-ghost btn-sm">All Alerts →</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Budget + Categories -->
+      <div class="mid-row">
+        <div class="card donut-card">
+          <div class="section-label">This Month</div>
+          <div class="donut-wrap">
+            <canvas id="budgetDonut"></canvas>
+            <div class="donut-center">
+              <div class="donut-val" id="donutSpent">₹0</div>
+              <div class="donut-sub">spent</div>
+            </div>
+          </div>
+          <div class="donut-legend" id="donutLegend">
+            <div class="legend-item"><div class="legend-dot" style="background:#1A6B4A;"></div><span class="legend-name">Needs</span><span class="legend-val" id="lgNeeds">₹0</span></div>
+            <div class="legend-item"><div class="legend-dot" style="background:#B86E0F;"></div><span class="legend-name">Wants</span><span class="legend-val" id="lgWants">₹0</span></div>
+            <div class="legend-item"><div class="legend-dot" style="background:#6B8CFF;"></div><span class="legend-name">Saved</span><span class="legend-val" id="lgSaved">₹0</span></div>
+            <div class="legend-item"><div class="legend-dot" style="background:#EDEAE4;border:1px solid #C8C2B8;"></div><span class="legend-name">Remaining</span><span class="legend-val" id="lgRemaining">₹0</span></div>
+          </div>
+        </div>
+
+        <div class="card categories-card">
+          <div class="section-header">
+            <span class="section-title">Category Budgets</span>
+            <a href="budget.html" class="btn btn-ghost btn-sm">View all →</a>
+          </div>
+          <div id="categoriesList"><div class="flex-center" style="padding:28px;"><div class="spinner"></div></div></div>
+        </div>
+      </div>
+
+      <!-- Txns + Goals + Streaks -->
+      <div class="bottom-row">
+        <div class="card txn-card">
+          <div class="section-header">
+            <span class="section-title">Recent Transactions</span>
+            <a href="expenses.html" class="btn btn-ghost btn-sm">All →</a>
+          </div>
+          <div id="recentTxns"><div class="flex-center" style="padding:28px;"><div class="spinner"></div></div></div>
+        </div>
+
+        <div class="right-col">
+          <div class="card" style="padding:20px;">
+            <div class="section-header">
+              <span class="section-title">Savings Goals</span>
+              <a href="goals.html" class="btn btn-ghost btn-sm">All →</a>
+            </div>
+            <div class="goals-list" id="goalsStrip"><div class="flex-center" style="padding:16px;"><div class="spinner"></div></div></div>
+          </div>
+
+          <div class="card" style="padding:20px;">
+            <div class="section-label" style="margin-bottom:14px;">Streaks</div>
+            <div class="streak-grid" id="streakGrid">
+              <div class="streak-item"><div class="streak-icon">📅</div><div class="streak-num zero" id="logStreak">0</div><div class="streak-label">Day Logging</div></div>
+              <div class="streak-item"><div class="streak-icon">💰</div><div class="streak-num zero" id="savStreak">0</div><div class="streak-label">Savings Hit</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div class="toast-container" id="toastContainer"></div>
+  <script src="../js/utils/api.js"></script>
+  <script src="../js/utils/toast.js"></script>
+  <script src="../js/utils/storage.js"></script>
+  <script src="../js/utils/helpers.js"></script>
+  <script src="../js/modules/sidebar.js"></script>
+  <script src="../js/modules/dashboard.js"></script>
+  <script>
+    SidebarModule.render('dashboard');
+    DashboardModule.init();
+    document.getElementById('logoutBtn')?.addEventListener('click', () => {
+      StorageUtil.clear(); window.location.href = 'login.html';
+    });
+  </script>
+</body>
+</html>

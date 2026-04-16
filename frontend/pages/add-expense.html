@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Add Expense — FinAlly Student</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=Lora:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/global.css" />
+  <link rel="stylesheet" href="../css/pages.css" />
+</head>
+<body>
+  
+  <div class="app-layout">
+    <!-- sidebar injected by JS -->
+    <aside class="sidebar" id="sidebar"></aside>
+
+    <main class="main-content">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Add Expense</h1>
+          <p class="page-subtitle">Log a transaction — AI classifies it instantly.</p>
+        </div>
+        <div style="display:flex;gap:12px;">
+          <label class="btn btn-outline" style="cursor:pointer;" title="Extract expenses from a screenshot">
+            📸 Scan Screenshot
+            <input type="file" id="scanImageInput" accept="image/*" style="display:none;">
+          </label>
+          <a href="dashboard.html" class="btn btn-outline">← Dashboard</a>
+        </div>
+      </div>
+
+      <div class="add-expense-grid">
+        <!-- Form -->
+        <div class="card">
+          <form class="add-expense-form" id="addExpenseForm" novalidate>
+            <div class="form-group">
+              <label class="form-label" for="expAmount">Amount (₹)</label>
+              <input class="form-input" id="expAmount" type="number" placeholder="e.g. 250" min="1" step="0.01" required />
+              <span class="form-error-msg" id="amountError">Enter a valid amount.</span>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="expDescription">Description / Merchant</label>
+              <input class="form-input" id="expDescription" type="text" placeholder="e.g. Zomato, Uber, Walmart" required />
+              <span class="form-error-msg" id="descError">Enter a description.</span>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="expDate">Date</label>
+              <input class="form-input" id="expDate" type="date" required />
+              <span class="form-error-msg" id="dateError">Select a date.</span>
+            </div>
+
+            <!-- Auto-classify result -->
+            <div id="classifyBanner" class="auto-classify-banner hidden">
+              <span class="classify-icon">✨</span>
+              <span>Auto-classified as: <strong id="classifyCategory">—</strong></span>
+              <span class="chip chip-need" id="classifyChip" style="margin-left:auto;"></span>
+            </div>
+
+            <!-- Category override -->
+            <div class="form-group">
+              <label class="form-label">Category <span style="font-weight:400;text-transform:none;letter-spacing:0;">(auto-selected or pick manually)</span></label>
+              <div class="category-chip-grid" id="categoryGrid">
+                <!-- populated by JS -->
+              </div>
+              <span class="form-error-msg" id="categoryError">Select a category.</span>
+            </div>
+
+            <!-- Duplicate warning -->
+            <div id="duplicateWarning" class="duplicate-warning hidden">
+              ⚠️ &nbsp;This looks like a duplicate transaction. Please verify before saving.
+            </div>
+
+            <!-- Anomaly warning -->
+            <div id="anomalyWarning" class="alert alert-warn hidden">
+              📈 This amount is significantly higher than your usual spend here. Are you sure?
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-lg" id="saveExpBtn" style="width:100%;justify-content:center;">
+              <span id="saveExpText">Save Expense</span>
+              <span id="saveExpSpinner" class="spinner hidden" style="width:18px;height:18px;border-width:2px;"></span>
+            </button>
+
+            <div id="saveExpError" class="alert alert-danger hidden"></div>
+          </form>
+        </div>
+
+        <!-- Right panel: budget status -->
+        <div style="display:flex;flex-direction:column;gap:20px;">
+          <!-- OCR Results (Hidden by default) -->
+          <div class="card hidden" id="ocrResultsCard">
+            <div class="section-header">
+              <h3 class="section-title">🔍 Scanned Results</h3>
+              <span class="chip chip-need" id="ocrCountChip">0 items</span>
+            </div>
+            <p style="font-size:0.8rem;color:var(--clr-muted);margin-bottom:12px;">Review and correct the extracted details before saving.</p>
+            
+            <div class="ocr-results-list" id="ocrResultsList">
+               <!-- Table injected by JS -->
+            </div>
+
+            <div style="margin-top:16px;display:flex;gap:12px;">
+                <button class="btn btn-primary" id="ocrSyncAllBtn" style="flex:1;justify-content:center;">Confirm & Sync All</button>
+                <button class="btn btn-outline" id="ocrDiscardBtn">Discard</button>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="section-header">
+              <h3 class="section-title">Budget Status</h3>
+            </div>
+            <div id="budgetStatusList">
+              <div class="flex-center" style="padding:24px;"><div class="spinner"></div></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="section-header">
+              <h3 class="section-title">Recent</h3>
+            </div>
+            <div id="recentExpensesMini">
+              <div class="flex-center" style="padding:24px;"><div class="spinner"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Emotional Spending Guard Overlay -->
+  <div class="emotional-overlay" id="emotionalOverlay">
+    <div class="emotional-card">
+      <div class="emotional-emoji">💭</div>
+      <h3 class="emotional-title">Take a moment…</h3>
+      <p class="emotional-msg" id="emotionalMsg">
+        You've made several purchases in a short time. Is this something you planned?
+      </p>
+      <div class="emotional-actions">
+        <button class="btn btn-primary" id="emotionalProceed">Yes, proceed</button>
+        <button class="btn btn-outline" id="emotionalReview">Let me review first</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="overrideModal">
+    <div class="modal" style="max-width:400px;">
+      <h3 style="margin-bottom:8px;">Unknown Merchant Detected</h3>
+      <p style="margin-bottom:16px;color:var(--clr-muted);font-size:0.85rem;"><strong id="overrideMerchantName">This shop name</strong> is new to us. Help the AI learn by assigning a permanent category to it now!</p>
+      <div class="form-group">
+        <label class="form-label">Category</label>
+        <div class="category-chip-grid" id="overrideCategoryGrid" style="gap:8px;"></div>
+      </div>
+      <div style="display:flex;gap:12px;justify-content:flex-end;">
+        <button class="btn btn-outline" id="overrideCancelBtn">Skip</button>
+        <button class="btn btn-primary" id="overrideConfirmBtn">Map & Save</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script src="../js/utils/api.js"></script>
+  <script src="../js/utils/toast.js"></script>
+  <script src="../js/utils/storage.js"></script>
+  <script src="../js/utils/helpers.js"></script>
+  <script src="../js/modules/sidebar.js"></script>
+  <script src="../js/modules/add-expense.js"></script>
+  
+  <!-- Tesseract.js for browser-side OCR -->
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+  <script src="../js/modules/ocr-scanner.js"></script>
+
+  <script>
+    SidebarModule.render('add-expense');
+    AddExpenseModule.init();
+    window.OcrScanner && window.OcrScanner.init();
+  </script>
+</body>
+</html>

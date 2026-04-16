@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Expense History — FinAlly Student</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=Lora:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/global.css" /><link rel="stylesheet" href="../css/pages.css" />
+</head>
+<body>
+  
+  <div class="app-layout">
+    <aside class="sidebar" id="sidebar"></aside>
+    <main class="main-content">
+      <div class="page-header">
+        <div><h1 class="page-title">Expense History</h1><p class="page-subtitle">All your logged transactions.</p></div>
+        <div style="display:flex;gap:12px;">
+          <!-- OCR Results (Hidden by default) -->
+          <div class="card hidden" id="ocrResultsCard" style="position:fixed; top:80px; right:24px; width:400px; z-index:1000; box-shadow:var(--shadow-lg); border:2px solid var(--green-mid);">
+            <div class="section-header">
+              <h3 class="section-title">🔍 Scanned Results</h3>
+              <span class="chip chip-need" id="ocrCountChip">0 items</span>
+            </div>
+            <p style="font-size:0.8rem;color:var(--text-muted);margin-bottom:12px;">Review and correct before adding to history.</p>
+            
+            <div class="ocr-results-list" id="ocrResultsList"></div>
+
+            <div style="margin-top:16px;display:flex;gap:12px;">
+                <button class="btn btn-primary" id="ocrSyncAllBtn" style="flex:1;justify-content:center;">Add to History</button>
+                <button class="btn btn-outline" id="ocrDiscardBtn">Discard</button>
+            </div>
+          </div>
+
+          <label class="btn btn-outline" style="cursor:pointer;" title="Extract expenses from a screenshot">
+            📸 Scan Screenshot
+            <input type="file" id="scanImageInput" accept="image/*" style="display:none;">
+          </label>
+          <label class="btn btn-outline" style="cursor:pointer;">
+            ⬆️ Upload CSV
+            <input type="file" id="uploadCsvInput" accept=".csv" style="display:none;">
+          </label>
+          <a href="add-expense.html" class="btn btn-primary">➕ Add Expense</a>
+        </div>
+      </div>
+      <div class="filter-bar">
+        <select class="form-select" id="filterMonth"><option value="">All Months</option></select>
+        <select class="form-select" id="filterCategory"><option value="">All Categories</option></select>
+        <input class="form-input" id="filterSearch" type="text" placeholder="Search description…" />
+        <button class="btn btn-outline btn-sm" id="filterClear">Clear</button>
+        <span style="margin-left:auto;font-family:var(--font-display);font-size:0.85rem;color:var(--clr-muted);" id="filterCount"></span>
+      </div>
+      <div class="table-wrapper">
+        <table class="expense-table" id="expenseTable">
+          <thead>
+            <tr>
+              <th>Date</th><th>Description</th><th>Category</th><th>Type</th><th>Amount</th><th>Flags</th><th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="expenseTableBody">
+            <tr><td colspan="7" style="text-align:center;padding:40px;"><div class="spinner" style="margin:auto;"></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+  <div class="toast-container" id="toastContainer"></div>
+  <div class="modal-overlay" id="deleteModal">
+    <div class="modal" style="max-width:360px;text-align:center;">
+      <div style="font-size:2.5rem;margin-bottom:12px;">🗑️</div>
+      <h3 style="margin-bottom:8px;">Delete Transaction?</h3>
+      <p style="margin-bottom:24px;">This action cannot be undone.</p>
+      <div style="display:flex;gap:12px;justify-content:center;">
+        <button class="btn btn-outline" id="deleteCancelBtn">Cancel</button>
+        <button class="btn btn-primary" id="deleteConfirmBtn" style="background:var(--clr-accent2);">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="overrideModal">
+    <div class="modal" style="max-width:400px;">
+      <h3 style="margin-bottom:8px;">Map Unknown Merchant</h3>
+      <p style="margin-bottom:16px;color:var(--clr-muted);font-size:0.85rem;">Help the AI learn by assigning a permanent category to this merchant.</p>
+      <div class="form-group">
+        <label class="form-label">Category</label>
+        <div class="category-chip-grid" id="overrideCategoryGrid" style="gap:8px;"></div>
+      </div>
+      <div style="display:flex;gap:12px;justify-content:flex-end;">
+        <button class="btn btn-outline" id="overrideCancelBtn">Cancel</button>
+        <button class="btn btn-primary" id="overrideConfirmBtn">Map & Save</button>
+      </div>
+    </div>
+  </div>
+  <script src="../js/utils/api.js"></script><script src="../js/utils/toast.js"></script>
+  <script src="../js/utils/storage.js"></script><script src="../js/utils/helpers.js"></script>
+  <script src="../js/modules/sidebar.js"></script><script src="../js/modules/expenses.js"></script>
+  
+  <!-- Tesseract.js for browser-side OCR -->
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+  <script src="../js/modules/ocr-scanner.js"></script>
+  
+  <script>SidebarModule.render('expenses'); ExpensesModule.init(); window.OcrScanner && window.OcrScanner.init();</script>
+</body>
+</html>
