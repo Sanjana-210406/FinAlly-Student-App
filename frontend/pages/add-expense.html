@@ -22,11 +22,28 @@
           <p class="page-subtitle">Log a transaction — AI classifies it instantly.</p>
         </div>
         <div style="display:flex;gap:12px;">
-          <label class="btn btn-outline" style="cursor:pointer;" title="Extract expenses from a screenshot">
-            📸 Scan Screenshot
-            <input type="file" id="scanImageInput" accept="image/*" style="display:none;">
-          </label>
           <a href="dashboard.html" class="btn btn-outline">← Dashboard</a>
+        </div>
+      </div>
+
+      <!-- NEW: Smart Consistency & Daily Scanner Prompt -->
+      <div class="card" id="consistencyCard" style="margin-bottom:24px; border:1px dashed var(--blue-mid); background:rgba(var(--blue-rgb), 0.03);">
+        <div style="display:flex; gap:20px; align-items:center;">
+          <div style="font-size:3rem;">🤖</div>
+          <div style="flex:1;">
+            <h3 style="margin-bottom:4px; font-family:var(--font-display);">We know it's hard to log every expense...</h3>
+            <p style="color:var(--text-muted); font-size:0.95rem; margin-bottom:12px;">Why don't you just upload your today's transaction history? FinAlly will sort it out for you.</p>
+            
+            <div id="missingDaysContainer" style="margin-bottom:12px;"></div>
+
+            <div style="display:flex; gap:12px;">
+              <label class="btn btn-primary btn-sm" style="cursor:pointer; background:var(--blue-mid);">
+                📸 Scan Today's Transaction
+                <input type="file" id="scanImageInput" accept="image/*" style="display:none;">
+              </label>
+              <button class="btn btn-outline btn-sm" id="hideConsistencyBtn">I've already logged everything</button>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -62,7 +79,7 @@
             <!-- Category override -->
             <div class="form-group">
               <label class="form-label">Category <span style="font-weight:400;text-transform:none;letter-spacing:0;">(auto-selected or pick manually)</span></label>
-              <div class="category-chip-grid" id="categoryGrid">
+              <div class="cat-grid" id="categoryGrid">
                 <!-- populated by JS -->
               </div>
               <span class="form-error-msg" id="categoryError">Select a category.</span>
@@ -150,7 +167,7 @@
       <p style="margin-bottom:16px;color:var(--clr-muted);font-size:0.85rem;"><strong id="overrideMerchantName">This shop name</strong> is new to us. Help the AI learn by assigning a permanent category to it now!</p>
       <div class="form-group">
         <label class="form-label">Category</label>
-        <div class="category-chip-grid" id="overrideCategoryGrid" style="gap:8px;"></div>
+        <div class="cat-grid" id="overrideCategoryGrid" style="gap:8px;"></div>
       </div>
       <div style="display:flex;gap:12px;justify-content:flex-end;">
         <button class="btn btn-outline" id="overrideCancelBtn">Skip</button>

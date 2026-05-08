@@ -32,6 +32,7 @@ public class AlertService {
         return alertRepo.save(alert);
     }
 
+    @Transactional(readOnly = true)
     public List<AlertResponse> getAlerts(Long userId) {
         return alertRepo.findByUserIdOrderByCreatedAtDesc(userId)
             .stream().map(this::toDto).collect(Collectors.toList());
@@ -51,6 +52,7 @@ public class AlertService {
         return alertRepo.countByUserIdAndIsReadFalse(userId);
     }
 
+    @Transactional(readOnly = true)
     public List<AlertResponse> getBotMessages(Long userId) {
         return alertRepo.findBotMessagesByUserId(userId)
             .stream().map(this::toDto).collect(Collectors.toList());

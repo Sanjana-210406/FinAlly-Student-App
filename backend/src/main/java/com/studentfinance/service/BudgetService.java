@@ -26,6 +26,7 @@ public class BudgetService {
     private final IncomeSourceRepository incomeRepo;
     private final ExpenseRepository      expenseRepo;
     private final SavingsGoalRepository  goalRepo;
+    private final UserRepository         userRepo;
 
     /**
      * Savings-First Budget Allocation Algorithm
@@ -85,7 +86,11 @@ public class BudgetService {
     public BudgetResponse getCurrentBudget(Long userId) {
         LocalDate now = LocalDate.now();
         Budget b = budgetRepo.findByUserIdAndMonthAndYear(userId, now.getMonthValue(), now.getYear())
-            .orElseThrow(() -> new RuntimeException("No budget found for current month. Please set up your income first."));
+            .orElseGet(() -> {
+                User user = userRepo.findById(userId)
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+                return generateBudget(user, now.getMonthValue(), now.getYear());
+            });
 
         BigDecimal totalSpent = expenseRepo.sumByBudget(userId, b.getId());
 
@@ -113,6 +118,7 @@ public class BudgetService {
             .emergencyFundBalance(emergencyBalance)
             .emergencyFundTarget(emergencyTarget)
             .categoryAllocations(buildCategoryAllocations(b))
+            .categoryBreakdown(buildCategoryBreakdown(userId, b.getId(), buildCategoryAllocations(b)))
             .build();
     }
 
@@ -133,6 +139,25 @@ public class BudgetService {
         map.put("Shopping",     wants.multiply(new BigDecimal("0.35")).setScale(2, RoundingMode.HALF_UP));
         map.put("Education",    wants.multiply(new BigDecimal("0.30")).setScale(2, RoundingMode.HALF_UP));
         return map;
+    }
+
+    private List<BudgetResponse.CategoryBreakdownDto> buildCategoryBreakdown(Long userId, Long budgetId, Map<String, BigDecimal> allocations) {
+        List<Expense> expenses = expenseRepo.findByUserIdAndBudgetIdOrderByDateDesc(userId, budgetId);
+        Map<String, BigDecimal> spentMap = new HashMap<>();
+        for (Expense e : expenses) {
+            String catName = e.getCategory().getName();
+            spentMap.put(catName, spentMap.getOrDefault(catName, BigDecimal.ZERO).add(e.getAmount()));
+        }
+
+        List<BudgetResponse.CategoryBreakdownDto> list = new ArrayList<>();
+        for (Map.Entry<String, BigDecimal> entry : allocations.entrySet()) {
+            list.add(BudgetResponse.CategoryBreakdownDto.builder()
+                .name(entry.getKey())
+                .budgeted(entry.getValue())
+                .spent(spentMap.getOrDefault(entry.getKey(), BigDecimal.ZERO))
+                .build());
+        }
+        return list;
     }
 
     public YearlyProgressResponse getYearlyProgress(Long userId) {

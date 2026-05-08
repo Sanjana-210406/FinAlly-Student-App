@@ -31,23 +31,27 @@ const DashboardModule = (() => {
     const val  = Math.round(score?.score || 0);
     const circ = 2 * Math.PI * 46;
     const offset = circ - (val / 100) * circ;
-    const ring = document.getElementById('scoreRingFill');
+    const ring = document.getElementById('scoreRing');
     if (ring) { ring.style.strokeDasharray = circ; ring.style.strokeDashoffset = offset; }
 
-    document.getElementById('scoreVal')?.setAttribute('data-val', val);
-    document.getElementById('scoreVal') && (document.getElementById('scoreVal').textContent = val);
+    document.getElementById('scoreNum')?.setAttribute('data-val', val);
+    document.getElementById('scoreNum') && (document.getElementById('scoreNum').textContent = val);
 
     const { label, color } = Helpers.scoreRating(val);
-    const ratingEl = document.getElementById('healthRating');
+    const ratingEl = document.getElementById('scoreRating');
     if (ratingEl) { ratingEl.textContent = label; ratingEl.style.color = color; }
-    const descEl = document.getElementById('healthDesc');
-    if (descEl) descEl.textContent = Helpers.scoreDesc(val);
 
-    document.getElementById('hcSavings')   && (document.getElementById('hcSavings').textContent   = Math.round(score?.savingsComponent   || 0) + '/35');
-    document.getElementById('hcAdherence') && (document.getElementById('hcAdherence').textContent = Math.round(score?.adherenceComponent  || 0) + '/25');
-    document.getElementById('hcGoal')      && (document.getElementById('hcGoal').textContent      = Math.round(score?.goalComponent       || 0) + '/20');
-    document.getElementById('hcEmergency') && (document.getElementById('hcEmergency').textContent = Math.round(score?.emergencyFundComponent || 0) + '/10');
-    document.getElementById('hcBehavior')  && (document.getElementById('hcBehavior').textContent  = Math.round(score?.behaviorComponent   || 0) + '/10');
+    const compHtml = `
+      <div style="font-size:0.75rem; color:var(--clr-muted); display:grid; grid-template-columns: 1fr 1fr; gap: 6px; padding-top: 10px;">
+        <div>Savings: <strong>${Math.round(score?.savingsComponent||0)}</strong>/35</div>
+        <div>Budget: <strong>${Math.round(score?.adherenceComponent||0)}</strong>/25</div>
+        <div>Goals: <strong>${Math.round(score?.goalComponent||0)}</strong>/20</div>
+        <div>Safety: <strong>${Math.round(score?.emergencyFundComponent||0)}</strong>/10</div>
+        <div>Behavior: <strong>${Math.round(score?.behaviorComponent||0)}</strong>/10</div>
+      </div>
+    `;
+    const compEl = document.getElementById('scoreComponents');
+    if (compEl) compEl.innerHTML = compHtml;
   };
 
   // ── Bot Card ───────────────────────────────────────────────
@@ -67,10 +71,10 @@ const DashboardModule = (() => {
     const remaining = Math.max(0, (budget?.totalIncome || 0) - needs - wants - saved);
 
     document.getElementById('donutSpent')     && (document.getElementById('donutSpent').textContent = Helpers.fmt(needs + wants));
-    document.getElementById('legendNeeds')    && (document.getElementById('legendNeeds').textContent = Helpers.fmt(needs));
-    document.getElementById('legendWants')    && (document.getElementById('legendWants').textContent = Helpers.fmt(wants));
-    document.getElementById('legendSaved')    && (document.getElementById('legendSaved').textContent = Helpers.fmt(saved));
-    document.getElementById('legendRemaining')&& (document.getElementById('legendRemaining').textContent = Helpers.fmt(remaining));
+    document.getElementById('lgNeeds')        && (document.getElementById('lgNeeds').textContent = Helpers.fmt(needs));
+    document.getElementById('lgWants')        && (document.getElementById('lgWants').textContent = Helpers.fmt(wants));
+    document.getElementById('lgSaved')        && (document.getElementById('lgSaved').textContent = Helpers.fmt(saved));
+    document.getElementById('lgRemaining')    && (document.getElementById('lgRemaining').textContent = Helpers.fmt(remaining));
 
     document.getElementById('monthSavings') && (document.getElementById('monthSavings').textContent = Helpers.fmt(saved));
     document.getElementById('monthTarget')  && (document.getElementById('monthTarget').textContent  = Helpers.fmt(budget?.savingsTarget || 0));
@@ -186,7 +190,7 @@ const DashboardModule = (() => {
     const log  = streaks.find(s => s.streakType === 'LOGGING')?.streakCount  || 0;
     const sav  = streaks.find(s => s.streakType === 'SAVINGS_HIT')?.streakCount || 0;
     document.getElementById('logStreak')     && (document.getElementById('logStreak').textContent     = log);
-    document.getElementById('savingsStreak') && (document.getElementById('savingsStreak').textContent = sav);
+    document.getElementById('savStreak')     && (document.getElementById('savStreak').textContent     = sav);
   };
 
   // ── Main init ──────────────────────────────────────────────

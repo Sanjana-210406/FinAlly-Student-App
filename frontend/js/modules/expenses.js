@@ -3,6 +3,7 @@
    ============================================================ */
 
 const ExpensesModule = (() => {
+  window.ExpensesModule = {}; // Ensure early global access
 
   let allExpenses = [];
   let deleteTargetId = null;
@@ -10,11 +11,69 @@ const ExpensesModule = (() => {
   async function init() {
     if (!StorageUtil.requireAuth()) return;
     await loadExpenses();
+    checkConsistency(); // Run in background - do not await to prevent blocking!
     bindFilters();
     bindDeleteModal();
     bindOverrideModal();
     bindBulkUpload();
     bindOcrEvents();
+  }
+
+  // --- Consistency & Gap Detection ---
+  async function checkConsistency() {
+      const container = document.getElementById('missingDaysContainer');
+      const card = document.getElementById('consistencyCard');
+      const hideBtn = document.getElementById('hideConsistencyBtn');
+      if (!container || !card) return;
+
+      hideBtn?.addEventListener('click', () => card.classList.add('hidden'));
+
+      try {
+          const user = await ApiUtil.Auth.me();
+          const loggedDates = (await ApiUtil.Expenses.getLoggedDates()) || [];
+          const createdAt = new Date(user.createdAt);
+          const today = new Date();
+          today.setHours(0,0,0,0);
+          
+          const missing = [];
+          const loggedSet = new Set(loggedDates);
+
+          // Check last 30 days or since account creation (Strict limit to prevent hang)
+          const thirtyDaysAgo = new Date();
+          thirtyDaysAgo.setDate(today.getDate() - 30);
+          
+          const start = new Date(Math.max(createdAt.getTime() || 0, thirtyDaysAgo.getTime()));
+          start.setHours(0,0,0,0);
+
+          for (let d = new Date(start); d <= today; d.setDate(d.getDate() + 1)) {
+              const iso = d.toISOString().split('T')[0];
+              if (!loggedSet.has(iso)) {
+                  missing.push(new Date(d));
+              }
+          }
+
+          if (missing.length === 0) {
+              card.classList.add('hidden');
+              return;
+          }
+
+          // Render gaps
+          const dateList = missing.slice(-7).reverse(); // Show last 7 missing days
+          container.innerHTML = `
+            <div style="font-size:0.85rem; padding:8px 12px; background:rgba(255,255,255,0.6); border-radius:8px; border:1px solid rgba(var(--blue-rgb), 0.2);">
+              <span style="font-weight:600; color:var(--clr-accent2);">⚠️ ${missing.length} days incomplete:</span> 
+              <span style="color:var(--text-muted); margin-left:8px;">
+                ${dateList.map(d => d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })).join(', ')}
+                ${missing.length > 7 ? ' ... and more' : ''}
+              </span>
+            </div>
+          `;
+          card.classList.remove('hidden');
+
+      } catch (err) {
+          console.error("Consistency check failed:", err);
+          card.classList.add('hidden');
+      }
   }
 
   // --- OCR Results (Similar to add-expense.js) ---
@@ -129,7 +188,7 @@ const ExpensesModule = (() => {
   function populateMonthFilter() {
     const sel = document.getElementById('filterMonth');
     if (!sel) return;
-    const months = [...new Set(allExpenses.map(e => e.date?.slice(0, 7)))].sort().reverse();
+    const months = [...new Set(allExpenses.map(e => e.date?.slice(0, 7)))].filter(Boolean).sort().reverse();
     months.forEach(m => {
       const opt = document.createElement('option');
       opt.value = m;
@@ -253,14 +312,14 @@ const ExpensesModule = (() => {
     const grid = document.getElementById('overrideCategoryGrid');
     if (grid) {
       grid.innerHTML = Object.entries(Helpers.CATEGORY_META).map(([name, meta]) => `
-        <div class="category-chip" data-id="${meta.id || 1}" data-name="${name}">
-          ${meta.icon} ${name}
+        <div class="cat-tile" data-id="${meta.id || 1}" data-name="${name}">
+          <span class="cat-tile-icon">${meta.icon}</span> <span>${name}</span>
         </div>
       `).join('');
 
-      grid.querySelectorAll('.category-chip').forEach(chip => {
+      grid.querySelectorAll('.cat-tile').forEach(chip => {
         chip.addEventListener('click', () => {
-          grid.querySelectorAll('.category-chip').forEach(c => c.classList.remove('selected'));
+          grid.querySelectorAll('.cat-tile').forEach(c => c.classList.remove('selected'));
           chip.classList.add('selected');
           overrideSelectedCategory = chip.dataset.id || 1; // Backend expects category ID
         });
@@ -335,5 +394,116 @@ const ExpensesModule = (() => {
     });
   }
 
-  return { init };
+  // --- OCR Results (Scanner) ---
+  let scannedItems = [];
+
+  function bindOcrEvents() {
+      document.getElementById('ocrSyncAllBtn')?.addEventListener('click', handleOcrSync);
+      document.getElementById('ocrDiscardBtn')?.addEventListener('click', () => {
+          scannedItems = [];
+          document.getElementById('ocrResultsCard')?.classList.add('hidden');
+      });
+  }
+
+  function showOcrResults(items) {
+      scannedItems = items;
+      const card = document.getElementById('ocrResultsCard');
+      const list = document.getElementById('ocrResultsList');
+      const countChip = document.getElementById('ocrCountChip');
+      if (!card || !list || !countChip) return;
+
+      countChip.textContent = `${items.length} items`;
+      
+      list.innerHTML = `
+        <table class="ocr-results-table">
+          <thead>
+            <tr>
+              <th>Merchant</th>
+              <th>Amount</th>
+              <th>Date</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            ${items.map((item, idx) => {
+              const classify = Helpers.classifyExpense(item.description, item.amount);
+              const isUnknown = classify.category === 'Other' || classify.confidence === 'LOW';
+              return `
+                <tr data-idx="${idx}" class="${isUnknown ? 'row-unknown' : ''}">
+                  <td><input type="text" class="ocr-input ocr-desc" value="${item.description}" /></td>
+                  <td><input type="number" class="ocr-input ocr-amt" value="${item.amount}" step="0.01" /></td>
+                  <td><input type="date" class="ocr-input ocr-date" value="${item.date}" /></td>
+                  <td><button class="btn-icon ocr-remove" data-idx="${idx}">✕</button></td>
+                </tr>
+              `;
+            }).join('')}
+          </tbody>
+        </table>
+      `;
+
+      list.querySelectorAll('.ocr-remove').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+              const idx = parseInt(e.currentTarget.dataset.idx);
+              scannedItems.splice(idx, 1);
+              if (scannedItems.length === 0) {
+                  card.classList.add('hidden');
+              } else {
+                  showOcrResults(scannedItems);
+              }
+          });
+      });
+
+      card.classList.remove('hidden');
+      card.scrollIntoView({ behavior: 'smooth' });
+  }
+
+  async function handleOcrSync() {
+      const list = document.getElementById('ocrResultsList');
+      const rows = list.querySelectorAll('tbody tr');
+      const payload = [];
+
+      rows.forEach(row => {
+          const desc = row.querySelector('.ocr-desc').value.trim();
+          const amt  = parseFloat(row.querySelector('.ocr-amt').value);
+          const date = row.querySelector('.ocr-date').value;
+          if (desc && amt > 0 && date) {
+              payload.push({ description: desc, amount: amt, date: date });
+          }
+      });
+
+      if (!payload.length) return;
+
+      const btn = document.getElementById('ocrSyncAllBtn');
+      const originalText = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = 'Syncing...';
+
+      try {
+          const res = await ApiUtil.Expenses.bulk(payload);
+          if (res && res.length > 0) {
+              Toast.success(`✨ Successfully synced ${res.length} expenses!`);
+              document.getElementById('ocrResultsCard').classList.add('hidden');
+              scannedItems = [];
+              await loadExpenses();
+
+              // Prompt for unknown merchants
+              const unmapped = res.filter(r => r.classificationConfidence === 'LOW' || r.categoryName === 'Other');
+              if (unmapped.length > 0) {
+                 for (const exp of unmapped) {
+                   await openOverrideModal(exp.id, exp.description);
+                 }
+                 Toast.success('Finished mapping new merchants!');
+              }
+          }
+      } catch (err) {
+          Toast.error(err.message || 'Bulk sync failed.');
+      } finally {
+          btn.disabled = false;
+          btn.textContent = originalText;
+      }
+  }
+
+  const mod = { init, showOcrResults };
+  window.ExpensesModule = mod;
+  return mod;
 })();

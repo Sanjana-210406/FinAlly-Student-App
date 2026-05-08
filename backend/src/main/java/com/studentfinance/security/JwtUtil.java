@@ -54,6 +54,7 @@ public class JwtUtil {
             parseClaims(token);
             return true;
         } catch (JwtException | IllegalArgumentException e) {
+            e.printStackTrace();
             return false;
         }
     }

@@ -64,7 +64,7 @@ const AuthModule = (() => {
 
   const loginDemo = async () => {
     // Use demo credentials — backend should have a seeded demo account
-    await login('demo_new@student.finally', 'Demo@1234');
+    await login('demo@student.finally', 'Demo@1234');
   };
 
   return { login, loginDemo };

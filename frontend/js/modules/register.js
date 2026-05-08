@@ -117,7 +117,7 @@ const RegisterModule = (() => {
       profileType:   'STUDENT',
       monthlyIncome: parseFloat(document.getElementById('regIncome')?.value),
       incomeSource:  document.getElementById('regIncomeSource')?.value,
-      yearlyGoal:    parseFloat(document.getElementById('regYearlyGoal')?.value) || null,
+      yearlyTarget:  parseFloat(document.getElementById('regYearlyGoal')?.value) || null,
     };
 
     try {

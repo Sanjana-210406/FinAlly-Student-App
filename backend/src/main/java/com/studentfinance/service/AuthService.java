@@ -69,8 +69,8 @@ public class AuthService {
             goalService.createEmergencyFundGoal(user, req.getMonthlyIncome());
 
             // 5. Optional yearly goal
-            if (req.getYearlyGoal() != null && req.getYearlyGoal().compareTo(BigDecimal.ZERO) > 0) {
-                goalService.createYearlyGoal(user, req.getYearlyGoal(), now.getYear());
+            if (req.getYearlyTarget() != null && req.getYearlyTarget().compareTo(BigDecimal.ZERO) > 0) {
+                goalService.createYearlyGoal(user, req.getYearlyTarget(), now.getYear());
             }
         }
 

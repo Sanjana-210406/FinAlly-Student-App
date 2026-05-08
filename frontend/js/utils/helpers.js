@@ -116,12 +116,12 @@ const Helpers = (() => {
       if (desc.includes(kw)) return { category: cat, confidence: 'HIGH', ...CATEGORY_META[cat] };
     }
 
-    // Layer 2: amount heuristic
-    const amt = Number(amount);
-    if (amt < 200)        return { category: 'Food & Dining',  confidence: 'MEDIUM', ...CATEGORY_META['Food & Dining']  };
-    if (amt < 500)        return { category: 'Food & Dining',  confidence: 'MEDIUM', ...CATEGORY_META['Food & Dining']  };
-    if (amt < 2000)       return { category: 'Shopping',       confidence: 'LOW',    ...CATEGORY_META['Shopping']       };
-    return                       { category: 'Other',          confidence: 'LOW',    ...CATEGORY_META['Other']          };
+    // Layer 2: Default fallback (No more aggressive guessing based on amount)
+    return { 
+      category: 'Other', 
+      confidence: 'LOW', 
+      ...CATEGORY_META['Other'] 
+    };
   };
 
   // All categories list for UI

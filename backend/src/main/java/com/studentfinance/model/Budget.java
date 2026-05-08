@@ -17,10 +17,10 @@ public class Budget {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "TINYINT")
     private Integer month;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "SMALLINT")
     private Integer year;
 
     @Column(name = "total_income", nullable = false, precision = 12, scale = 2)

@@ -33,4 +33,7 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
 
     @Query("SELECT COUNT(e) FROM Expense e WHERE e.user.id=:uid AND e.createdAt >= :since")
     long countRecentByUserId(@Param("uid") Long userId, @Param("since") java.time.LocalDateTime since);
+
+    @Query("SELECT DISTINCT e.date FROM Expense e WHERE e.user.id = :uid ORDER BY e.date DESC")
+    List<LocalDate> findDistinctDatesByUserId(@Param("uid") Long userId);
 }

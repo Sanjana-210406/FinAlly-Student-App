@@ -20,5 +20,5 @@ public class RegisterRequest {
     private String studyYear;
     private BigDecimal monthlyIncome;
     private IncomeSource.IncomeType incomeType;
-    private BigDecimal yearlyGoal;
+    private BigDecimal yearlyTarget;
 }

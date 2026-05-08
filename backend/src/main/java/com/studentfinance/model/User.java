@@ -34,7 +34,7 @@ public class User {
     @Column(nullable = false)
     private Gender gender = Gender.OTHER;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "TINYINT")
     private Integer age = 20;
 
     @Column(length = 200)

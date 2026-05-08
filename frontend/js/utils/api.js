@@ -3,7 +3,13 @@
    All endpoints match the Spring Boot REST API design
    ============================================================ */
 
-const API_BASE = 'http://localhost:8080/api';
+// Automatically determine API base URL depending on the environment
+const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+// Change 'REPLACE_ME_WITH_YOUR_RENDER_URL' once your backend is deployed (e.g. 'https://finally-backend.onrender.com')
+const PROD_API_BASE = 'REPLACE_ME_WITH_YOUR_RENDER_URL/api';
+
+// You can override the API base by setting 'api_base' in localStorage for testing
+const API_BASE = localStorage.getItem('api_base') || (isLocal ? 'http://localhost:8080/api' : PROD_API_BASE);
 
 const ApiUtil = (() => {
 
@@ -63,6 +69,7 @@ const ApiUtil = (() => {
     list:           ()   => get('/expenses'),
     updateCategory: (id, categoryId) => put(`/expenses/${id}/category`, { categoryId }),
     remove:         (id) => del(`/expenses/${id}`),
+    getLoggedDates: ()   => get('/expenses/logged-dates'),
   };
 
   // ── Safety & Goals ─────────────────────────────────────────

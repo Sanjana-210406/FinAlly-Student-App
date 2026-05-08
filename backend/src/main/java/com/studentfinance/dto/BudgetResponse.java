@@ -25,4 +25,12 @@ public class BudgetResponse {
     private BigDecimal emergencyFundBalance;
     private BigDecimal emergencyFundTarget;
     private Map<String, BigDecimal> categoryAllocations;
+    private List<CategoryBreakdownDto> categoryBreakdown;
+
+    @Data @NoArgsConstructor @AllArgsConstructor @Builder
+    public static class CategoryBreakdownDto {
+        private String name;
+        private BigDecimal spent;
+        private BigDecimal budgeted;
+    }
 }

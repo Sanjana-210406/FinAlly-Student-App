@@ -134,6 +134,11 @@ class ExpenseController extends BaseController {
         return ResponseEntity.ok(expenseService.overrideCategory(currentUser(ud), id, req.getCategoryId()));
     }
 
+    @GetMapping("/logged-dates")
+    public ResponseEntity<List<java.time.LocalDate>> getLoggedDates(@AuthenticationPrincipal UserDetails ud) {
+        return ResponseEntity.ok(expenseService.getLoggedDates(currentUser(ud).getId()));
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteExpense(@AuthenticationPrincipal UserDetails ud,
                                                @PathVariable Long id) {

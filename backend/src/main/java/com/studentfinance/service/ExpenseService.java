@@ -29,13 +29,17 @@ public class ExpenseService {
     private final AlertService                   alertService;
     private final HealthScoreService             healthScoreService;
     private final SubscriptionService            subscriptionService;
+    private final GamificationService            gamificationService;
+    private final BehavioralPatternRepository    patternRepo;
+    private final BudgetService                  budgetService;
 
     @Transactional
     public ExpenseResponse addExpense(User user, ExpenseRequest req) {
         // 1. Find or create budget for the expense date
-        Budget budget = budgetRepo.findByUserIdAndMonthAndYear(
-                user.getId(), req.getDate().getMonthValue(), req.getDate().getYear())
-            .orElseThrow(() -> new RuntimeException("No budget found for " + req.getDate() + ". Please generate your monthly budget first."));
+        int month = req.getDate().getMonthValue();
+        int year = req.getDate().getYear();
+        Budget budget = budgetRepo.findByUserIdAndMonthAndYear(user.getId(), month, year)
+            .orElseGet(() -> budgetService.generateBudget(user, month, year));
 
         // 2. Duplicate detection via fingerprint
         String fingerprint = generateFingerprint(user.getId(), req.getDate(), req.getAmount(), req.getDescription());
@@ -94,6 +98,10 @@ public class ExpenseService {
         // 10. Recalculate health score
         healthScoreService.recalculate(user);
 
+        // 11. Gamification and Behavioral Patterns
+        gamificationService.incrementStreak(user, Gamification.StreakType.LOGGING);
+        checkBehavioralPatterns(user, isAnomaly, isEmotional, isSub);
+
         return toResponse(expense, isDuplicate, classification.confidence);
     }
 
@@ -111,6 +119,12 @@ public class ExpenseService {
         return responses;
     }
 
+    @Transactional(readOnly = true)
+    public List<LocalDate> getLoggedDates(Long userId) {
+        return expenseRepo.findDistinctDatesByUserId(userId);
+    }
+
+    @Transactional(readOnly = true)
     public List<ExpenseResponse> getExpenses(Long userId) {
         return expenseRepo.findByUserIdOrderByDateDescCreatedAtDesc(userId)
             .stream().map(e -> toResponse(e, false, "STORED")).collect(Collectors.toList());
@@ -192,12 +206,7 @@ public class ExpenseService {
             }
         }
 
-        // Layer 2: amount heuristic
-        double amt = amount.doubleValue();
-        if (amt < 200) return findByName("Food & Dining", "MEDIUM");
-        if (amt < 500) return findByName("Food & Dining", "MEDIUM");
-        if (amt < 2000) return findByName("Shopping", "LOW");
-
+        // Layer 2: Default fallback (No more aggressive guessing based on amount)
         return defaultCategory();
     }
 
@@ -249,6 +258,25 @@ public class ExpenseService {
                 alertService.createAlert(user, Alert.AlertType.WARNING,
                     String.format("You've spent %.0f%% of your monthly budget. Watch your spending!", pct), category);
             }
+        }
+    }
+
+    private void checkBehavioralPatterns(User user, boolean isAnomaly, boolean isEmotional, boolean isSub) {
+        if (isAnomaly) {
+            patternRepo.save(BehavioralPattern.builder()
+                .user(user)
+                .patternType(BehavioralPattern.PatternType.IMPULSE_CLUSTER)
+                .description("Detected an anomalous spend pattern.")
+                .isActive(true)
+                .build());
+        }
+        if (isEmotional) {
+            patternRepo.save(BehavioralPattern.builder()
+                .user(user)
+                .patternType(BehavioralPattern.PatternType.MERCHANT_HABIT)
+                .description("Detected an emotional spend pattern.")
+                .isActive(true)
+                .build());
         }
     }
 

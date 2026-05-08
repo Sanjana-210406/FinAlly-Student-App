@@ -5,6 +5,7 @@
    ============================================================ */
 
 const AddExpenseModule = (() => {
+  window.AddExpenseModule = {}; // Ensure early global access
 
   let selectedCategory = null;
   let pendingSubmit    = false;
@@ -20,9 +21,61 @@ const AddExpenseModule = (() => {
 
     buildCategoryGrid();
     await Promise.all([loadBudgetStatus(), loadRecentExpenses()]);
+    checkConsistency(); // Background task
     bindEvents();
     bindOverrideModal();
     bindOcrEvents();
+  }
+
+  // --- Consistency & Gap Detection ---
+  async function checkConsistency() {
+      const container = document.getElementById('missingDaysContainer');
+      const card = document.getElementById('consistencyCard');
+      const hideBtn = document.getElementById('hideConsistencyBtn');
+      if (!container || !card) return;
+
+      hideBtn?.addEventListener('click', () => card.classList.add('hidden'));
+
+      try {
+          const user = await ApiUtil.Auth.me();
+          const loggedDates = (await ApiUtil.Expenses.getLoggedDates()) || [];
+          const loggedSet = new Set(loggedDates);
+          const today = new Date();
+          const missing = [];
+          const createdAt = new Date(user.createdAt);
+          // Check last 30 days or since account creation (Strict limit)
+          const thirtyDaysAgo = new Date();
+          thirtyDaysAgo.setDate(today.getDate() - 30);
+          const start = new Date(Math.max(createdAt.getTime() || 0, thirtyDaysAgo.getTime()));
+          start.setHours(0,0,0,0);
+
+          for (let d = new Date(start); d <= today; d.setDate(d.getDate() + 1)) {
+              const iso = d.toISOString().split('T')[0];
+              if (!loggedSet.has(iso)) {
+                  missing.push(new Date(d));
+              }
+          }
+
+          if (missing.length === 0) {
+              card.classList.add('hidden');
+              return;
+          }
+
+          const dateList = missing.slice(-7).reverse();
+          container.innerHTML = `
+            <div style="font-size:0.85rem; padding:8px 12px; background:rgba(255,255,255,0.6); border-radius:8px; border:1px solid rgba(var(--blue-rgb), 0.2);">
+              <span style="font-weight:600; color:var(--clr-accent2);">⚠️ ${missing.length} days incomplete:</span> 
+              <span style="color:var(--text-muted); margin-left:8px;">
+                ${dateList.map(d => d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })).join(', ')}
+                ${missing.length > 7 ? ' ... and more' : ''}
+              </span>
+            </div>
+          `;
+          card.classList.remove('hidden');
+      } catch (err) {
+          console.error("Consistency check failed:", err);
+          card.classList.add('hidden');
+      }
   }
 
   // --- OCR Results Review ---
@@ -56,14 +109,18 @@ const AddExpenseModule = (() => {
             </tr>
           </thead>
           <tbody>
-            ${items.map((item, idx) => `
-              <tr data-idx="${idx}">
-                <td><input type="text" class="ocr-input ocr-desc" value="${item.description}" /></td>
-                <td><input type="number" class="ocr-input ocr-amt ocr-input-amt" value="${item.amount}" step="0.01" /></td>
-                <td><input type="date" class="ocr-input ocr-date" value="${item.date}" /></td>
-                <td><button class="btn-icon ocr-remove" data-idx="${idx}" title="Remove">✕</button></td>
-              </tr>
-            `).join('')}
+            ${items.map((item, idx) => {
+              const classify = Helpers.classifyExpense(item.description, item.amount);
+              const isUnknown = classify.category === 'Other' || classify.confidence === 'LOW';
+              return `
+                <tr data-idx="${idx}" class="${isUnknown ? 'row-unknown' : ''}">
+                  <td><input type="text" class="ocr-input ocr-desc" value="${item.description}" /></td>
+                  <td><input type="number" class="ocr-input ocr-amt ocr-input-amt" value="${item.amount}" step="0.01" /></td>
+                  <td><input type="date" class="ocr-input ocr-date" value="${item.date}" /></td>
+                  <td><button class="btn-icon ocr-remove" data-idx="${idx}" title="Remove">✕</button></td>
+                </tr>
+              `;
+            }).join('')}
           </tbody>
         </table>
       `;
@@ -137,15 +194,15 @@ const AddExpenseModule = (() => {
     const grid = document.getElementById('categoryGrid');
     if (!grid) return;
     grid.innerHTML = Helpers.ALL_CATEGORIES.map(cat => `
-      <div class="cat-chip" data-cat="${cat.name}" title="${cat.type}">
-        <span class="cat-chip-icon">${cat.icon}</span>
+      <div class="cat-tile" data-cat="${cat.name}" title="${cat.type}">
+        <span class="cat-tile-icon">${cat.icon}</span>
         <span>${cat.name}</span>
       </div>
     `).join('');
 
-    grid.querySelectorAll('.cat-chip').forEach(chip => {
+    grid.querySelectorAll('.cat-tile').forEach(chip => {
       chip.addEventListener('click', () => {
-        grid.querySelectorAll('.cat-chip').forEach(c => c.classList.remove('selected'));
+        grid.querySelectorAll('.cat-tile').forEach(c => c.classList.remove('selected'));
         chip.classList.add('selected');
         selectedCategory = chip.dataset.cat;
         document.getElementById('categoryError')?.classList.remove('show');
@@ -200,7 +257,7 @@ const AddExpenseModule = (() => {
     // Auto-select category chip
     const grid = document.getElementById('categoryGrid');
     if (grid) {
-      grid.querySelectorAll('.cat-chip').forEach(c => {
+      grid.querySelectorAll('.cat-tile').forEach(c => {
         c.classList.remove('selected');
         if (c.dataset.cat === result.category) {
           c.classList.add('selected');
@@ -305,7 +362,7 @@ const AddExpenseModule = (() => {
       document.getElementById('addExpenseForm').reset();
       document.getElementById('expDate').value = Helpers.todayStr();
       selectedCategory = null;
-      document.querySelectorAll('.cat-chip').forEach(c => c.classList.remove('selected'));
+      document.querySelectorAll('.cat-tile').forEach(c => c.classList.remove('selected'));
       document.getElementById('classifyBanner')?.classList.add('hidden');
       document.getElementById('duplicateWarning')?.classList.add('hidden');
       document.getElementById('anomalyWarning')?.classList.add('hidden');
@@ -416,14 +473,14 @@ const AddExpenseModule = (() => {
       const grid = document.getElementById('overrideCategoryGrid');
       if (grid) {
         grid.innerHTML = Object.entries(Helpers.CATEGORY_META).map(([name, meta]) => `
-          <div class="category-chip" data-id="${meta.id || 1}" data-name="${name}">
-            ${meta.icon} ${name}
+          <div class="cat-tile" data-id="${meta.id || 1}" data-name="${name}">
+            <span class="cat-tile-icon">${meta.icon}</span> <span>${name}</span>
           </div>
         `).join('');
 
-        grid.querySelectorAll('.category-chip').forEach(chip => {
+        grid.querySelectorAll('.cat-tile').forEach(chip => {
           chip.addEventListener('click', () => {
-            grid.querySelectorAll('.category-chip').forEach(c => c.classList.remove('selected'));
+            grid.querySelectorAll('.cat-tile').forEach(c => c.classList.remove('selected'));
             chip.classList.add('selected');
             overrideSelectedCategory = chip.dataset.id || 1; // Backend expects category ID
           });
@@ -535,5 +592,7 @@ const AddExpenseModule = (() => {
     if (spin) spin.classList.toggle('hidden', !on);
   }
 
-  return { init, processUnknownMerchants };
+  const mod = { init, processUnknownMerchants, showOcrResults };
+  window.AddExpenseModule = mod;
+  return mod;
 })();
