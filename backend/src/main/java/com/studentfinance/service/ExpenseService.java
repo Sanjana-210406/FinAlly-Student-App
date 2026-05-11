@@ -105,7 +105,9 @@ public class ExpenseService {
         return toResponse(expense, isDuplicate, classification.confidence);
     }
 
-    @Transactional
+    // Note: NOT @Transactional — each addExpense() manages its own transaction.
+    // If bulkAdd were @Transactional, a single item failure would mark the whole
+    // outer transaction rollback-only, silently undoing all successful saves.
     public BulkExpenseResponse bulkAdd(User user, List<ExpenseRequest> reqs) {
         List<ExpenseResponse> saved = new ArrayList<>();
         int duplicates = 0;
