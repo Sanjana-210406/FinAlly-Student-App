@@ -118,7 +118,7 @@ class ExpenseController extends BaseController {
     }
 
     @PostMapping("/bulk")
-    public ResponseEntity<List<ExpenseResponse>> bulkAddExpenses(@AuthenticationPrincipal UserDetails ud,
+    public ResponseEntity<BulkExpenseResponse> bulkAddExpenses(@AuthenticationPrincipal UserDetails ud,
                                                        @Valid @RequestBody List<ExpenseRequest> req) {
         return ResponseEntity.ok(expenseService.bulkAdd(currentUser(ud), req));
     }

@@ -164,22 +164,29 @@ const AddExpenseModule = (() => {
 
       try {
           const res = await ApiUtil.Expenses.bulk(payload);
-          if (res && res.length > 0) {
-              Toast.success(`✨ Successfully synced ${res.length} expenses!`);
+          // res is now { saved: [...], duplicatesSkipped: N, totalSubmitted: N }
+          const saved      = res?.saved      ?? (Array.isArray(res) ? res : []);
+          const duplicates = res?.duplicatesSkipped ?? 0;
+
+          if (saved.length > 0) {
+              let msg = `✨ Successfully synced ${saved.length} expense${saved.length > 1 ? 's' : ''}!`;
+              if (duplicates > 0) msg += ` (${duplicates} already existed — skipped)`;
+              Toast.success(msg);
               document.getElementById('ocrResultsCard').classList.add('hidden');
               scannedItems = [];
-              
-              // Refresh budget and recent
+
               await loadBudgetStatus();
               await loadRecentExpenses();
 
-              // Check if any need mapping
-              const unmapped = res.filter(r => r.classificationConfidence === 'LOW' || r.categoryName === 'Other');
+              // Check if any need category mapping
+              const unmapped = saved.filter(r => r.classificationConfidence === 'LOW' || r.categoryName === 'Other');
               if (unmapped.length > 0) {
                   await processUnknownMerchants(unmapped);
               }
+          } else if (duplicates > 0) {
+              Toast.warn(`These ${duplicates} transaction${duplicates > 1 ? 's are' : ' is'} already in your history — nothing new to sync.`);
           } else {
-              Toast.warn('No items were saved. They might be duplicates or outside your budget window.');
+              Toast.warn('No items were saved. Check the dates and amounts and try again.');
           }
       } catch (err) {
           Toast.error(err.message || 'Bulk sync failed.');

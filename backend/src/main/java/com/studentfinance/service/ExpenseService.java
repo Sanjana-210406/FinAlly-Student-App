@@ -106,17 +106,26 @@ public class ExpenseService {
     }
 
     @Transactional
-    public List<ExpenseResponse> bulkAdd(User user, List<ExpenseRequest> reqs) {
-        List<ExpenseResponse> responses = new ArrayList<>();
+    public BulkExpenseResponse bulkAdd(User user, List<ExpenseRequest> reqs) {
+        List<ExpenseResponse> saved = new ArrayList<>();
+        int duplicates = 0;
         for (ExpenseRequest req : reqs) {
             try {
-                responses.add(addExpense(user, req));
-            } catch (Exception e) {
-                // Skip or log failure for individual rows in bulk mode
-                System.err.println("Skipped line in bulk upload: " + e.getMessage());
+                saved.add(addExpense(user, req));
+            } catch (RuntimeException e) {
+                String msg = e.getMessage() != null ? e.getMessage() : "";
+                if (msg.toLowerCase().contains("duplicate")) {
+                    duplicates++;
+                } else {
+                    System.err.println("Skipped line in bulk upload: " + msg);
+                }
             }
         }
-        return responses;
+        return BulkExpenseResponse.builder()
+                .saved(saved)
+                .duplicatesSkipped(duplicates)
+                .totalSubmitted(reqs.size())
+                .build();
     }
 
     @Transactional(readOnly = true)
