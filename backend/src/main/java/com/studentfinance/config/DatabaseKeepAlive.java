@@ -7,8 +7,8 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 /**
- * Keeps the Aiven free-tier MySQL alive by pinging it every 5 minutes.
- * Aiven auto-powers-off free services after inactivity — this prevents that.
+ * Keeps the Supabase PostgreSQL database alive by pinging it every 5 minutes.
+ * Supabase may close idle connections—this prevents that.
  */
 @Slf4j
 @Component

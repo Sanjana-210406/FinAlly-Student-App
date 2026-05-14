@@ -1,0 +1,16 @@
+{
+  "name": "finally-student-backend",
+  "type": "service",
+  "framework": "java",
+  "environment": {
+    "DB_URL": "${{SUPABASE_JDBC_URL}}",
+    "DB_USER": "${{SUPABASE_USER}}",
+    "DB_PASSWORD": "${{SUPABASE_PASSWORD}}",
+    "JWT_SECRET": "${{JWT_SECRET}}",
+    "CORS_ORIGINS": "https://your-frontend-domain.com"
+  },
+  "build": {
+    "dockerfilePath": "backend/Dockerfile",
+    "context": "."
+  }
+}

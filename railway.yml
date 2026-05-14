@@ -1,0 +1,15 @@
+services:
+  - name: backend
+    dockerfilePath: ./backend/Dockerfile
+    env:
+      - key: DB_URL
+        value: postgres://<USERNAME>:<PASSWORD>@<HOST>:5432/<DBNAME>
+      - key: DB_USER
+        value: <USERNAME>
+      - key: DB_PASSWORD
+        value: <PASSWORD>
+      - key: JWT_SECRET
+        generate: true
+    startCommand: "java -jar app.jar"
+    port: 8080
+    healthcheckPath: "/actuator/health"
