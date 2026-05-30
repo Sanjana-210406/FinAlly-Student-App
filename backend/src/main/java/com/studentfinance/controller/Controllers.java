@@ -52,6 +52,18 @@ class AuthController {
 }
 
 // ============================================================
+// HealthController  — /api/health
+// ============================================================
+@RestController
+@RequestMapping("/api/health")
+class HealthController {
+    @GetMapping
+    public ResponseEntity<Map<String, String>> health() {
+        return ResponseEntity.ok(Map.of("status", "UP", "message", "FinAlly Backend is online"));
+    }
+}
+
+// ============================================================
 // BudgetController  — /api/budget  +  /api/income
 // ============================================================
 @RestController

@@ -15,6 +15,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
+import org.springframework.transaction.annotation.Transactional;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Arrays;
@@ -26,6 +28,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@Transactional
 @ActiveProfiles("test")
 public class ExpenseControllerTest {
 
@@ -72,7 +75,7 @@ public class ExpenseControllerTest {
     void testAddSingleExpense() throws Exception {
         ExpenseRequest exp = ExpenseRequest.builder()
                 .amount(BigDecimal.valueOf(150))
-                .description("McDonalds Burger")
+                .description("McDonalds Burger restaurant")
                 .date(LocalDate.now())
                 .build();
 
@@ -107,7 +110,8 @@ public class ExpenseControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(bulkReq)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.size()").value(1)); // Only 1 should be added instead of failing whole transaction!
+                .andExpect(jsonPath("$.saved.size()").value(1))
+                .andExpect(jsonPath("$.duplicatesSkipped").value(1));
     }
 
     @Test

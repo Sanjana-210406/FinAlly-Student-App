@@ -1,16 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Add Expense — FinAlly Student</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=Lora:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=Lora:wght@400;500;600&display=swap"
+    rel="stylesheet" />
   <link rel="stylesheet" href="../css/global.css" />
   <link rel="stylesheet" href="../css/pages.css" />
 </head>
+
 <body>
-  
+
   <div class="app-layout">
     <!-- sidebar injected by JS -->
     <aside class="sidebar" id="sidebar"></aside>
@@ -27,13 +31,16 @@
       </div>
 
       <!-- NEW: Smart Consistency & Daily Scanner Prompt -->
-      <div class="card" id="consistencyCard" style="margin-bottom:24px; border:1px dashed var(--blue-mid); background:rgba(var(--blue-rgb), 0.03);">
+      <div class="card" id="consistencyCard"
+        style="margin-bottom:24px; border:1px dashed var(--blue-mid); background:rgba(var(--blue-rgb), 0.03);">
         <div style="display:flex; gap:20px; align-items:center;">
           <div style="font-size:3rem;">🤖</div>
           <div style="flex:1;">
-            <h3 style="margin-bottom:4px; font-family:var(--font-display);">We know it's hard to log every expense...</h3>
-            <p style="color:var(--text-muted); font-size:0.95rem; margin-bottom:12px;">Why don't you just upload your today's transaction history? FinAlly will sort it out for you.</p>
-            
+            <h3 style="margin-bottom:4px; font-family:var(--font-display);">We know it's hard to log every expense...
+            </h3>
+            <p style="color:var(--text-muted); font-size:0.95rem; margin-bottom:12px;">Why don't you just upload your
+              today's transaction history? FinAlly will sort it out for you.</p>
+
             <div id="missingDaysContainer" style="margin-bottom:12px;"></div>
 
             <div style="display:flex; gap:12px;">
@@ -53,13 +60,15 @@
           <form class="add-expense-form" id="addExpenseForm" novalidate>
             <div class="form-group">
               <label class="form-label" for="expAmount">Amount (₹)</label>
-              <input class="form-input" id="expAmount" type="number" placeholder="e.g. 250" min="1" step="0.01" required />
+              <input class="form-input" id="expAmount" type="number" placeholder="e.g. 250" min="1" step="0.01"
+                required />
               <span class="form-error-msg" id="amountError">Enter a valid amount.</span>
             </div>
 
             <div class="form-group">
               <label class="form-label" for="expDescription">Description / Merchant</label>
-              <input class="form-input" id="expDescription" type="text" placeholder="e.g. Zomato, Uber, Walmart" required />
+              <input class="form-input" id="expDescription" type="text" placeholder="e.g. Zomato, Uber, Walmart"
+                required />
               <span class="form-error-msg" id="descError">Enter a description.</span>
             </div>
 
@@ -78,7 +87,9 @@
 
             <!-- Category override -->
             <div class="form-group">
-              <label class="form-label">Category <span style="font-weight:400;text-transform:none;letter-spacing:0;">(auto-selected or pick manually)</span></label>
+              <label class="form-label">Category <span
+                  style="font-weight:400;text-transform:none;letter-spacing:0;">(auto-selected or pick
+                  manually)</span></label>
               <div class="cat-grid" id="categoryGrid">
                 <!-- populated by JS -->
               </div>
@@ -95,7 +106,8 @@
               📈 This amount is significantly higher than your usual spend here. Are you sure?
             </div>
 
-            <button type="submit" class="btn btn-primary btn-lg" id="saveExpBtn" style="width:100%;justify-content:center;">
+            <button type="submit" class="btn btn-primary btn-lg" id="saveExpBtn"
+              style="width:100%;justify-content:center;">
               <span id="saveExpText">Save Expense</span>
               <span id="saveExpSpinner" class="spinner hidden" style="width:18px;height:18px;border-width:2px;"></span>
             </button>
@@ -112,15 +124,17 @@
               <h3 class="section-title">🔍 Scanned Results</h3>
               <span class="chip chip-need" id="ocrCountChip">0 items</span>
             </div>
-            <p style="font-size:0.8rem;color:var(--clr-muted);margin-bottom:12px;">Review and correct the extracted details before saving.</p>
-            
+            <p style="font-size:0.8rem;color:var(--clr-muted);margin-bottom:12px;">Review and correct the extracted
+              details before saving.</p>
+
             <div class="ocr-results-list" id="ocrResultsList">
-               <!-- Table injected by JS -->
+              <!-- Table injected by JS -->
             </div>
 
             <div style="margin-top:16px;display:flex;gap:12px;">
-                <button class="btn btn-primary" id="ocrSyncAllBtn" style="flex:1;justify-content:center;">Confirm & Sync All</button>
-                <button class="btn btn-outline" id="ocrDiscardBtn">Discard</button>
+              <button class="btn btn-primary" id="ocrSyncAllBtn" style="flex:1;justify-content:center;">Confirm & Sync
+                All</button>
+              <button class="btn btn-outline" id="ocrDiscardBtn">Discard</button>
             </div>
           </div>
 
@@ -129,7 +143,9 @@
               <h3 class="section-title">Budget Status</h3>
             </div>
             <div id="budgetStatusList">
-              <div class="flex-center" style="padding:24px;"><div class="spinner"></div></div>
+              <div class="flex-center" style="padding:24px;">
+                <div class="spinner"></div>
+              </div>
             </div>
           </div>
 
@@ -138,7 +154,9 @@
               <h3 class="section-title">Recent</h3>
             </div>
             <div id="recentExpensesMini">
-              <div class="flex-center" style="padding:24px;"><div class="spinner"></div></div>
+              <div class="flex-center" style="padding:24px;">
+                <div class="spinner"></div>
+              </div>
             </div>
           </div>
         </div>
@@ -164,7 +182,8 @@
   <div class="modal-overlay" id="overrideModal">
     <div class="modal" style="max-width:400px;">
       <h3 style="margin-bottom:8px;">Unknown Merchant Detected</h3>
-      <p style="margin-bottom:16px;color:var(--clr-muted);font-size:0.85rem;"><strong id="overrideMerchantName">This shop name</strong> is new to us. Help the AI learn by assigning a permanent category to it now!</p>
+      <p style="margin-bottom:16px;color:var(--clr-muted);font-size:0.85rem;"><strong id="overrideMerchantName">This
+          shop name</strong> is new to us. Help the AI learn by assigning a permanent category to it now!</p>
       <div class="form-group">
         <label class="form-label">Category</label>
         <div class="cat-grid" id="overrideCategoryGrid" style="gap:8px;"></div>
@@ -184,7 +203,7 @@
   <script src="../js/utils/helpers.js"></script>
   <script src="../js/modules/sidebar.js"></script>
   <script src="../js/modules/add-expense.js"></script>
-  
+
   <!-- Tesseract.js for browser-side OCR -->
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
   <script src="../js/modules/ocr-scanner.js"></script>
@@ -195,4 +214,5 @@
     window.OcrScanner && window.OcrScanner.init();
   </script>
 </body>
+
 </html>

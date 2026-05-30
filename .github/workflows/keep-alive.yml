@@ -1,0 +1,17 @@
+name: Keep Render Backend Alive
+
+on:
+  schedule:
+    # Runs every 10 minutes (GitHub Actions cron schedule)
+    - cron: '*/10 * * * *'
+  workflow_dispatch: # Allows manual triggering from the GitHub Actions tab
+
+jobs:
+  ping:
+    name: Ping Health Endpoint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send GET request to /api/health
+        run: |
+          STATUS_CODE=$(curl -s -o /dev/null -w "%{http_code}" https://finally-student-app.onrender.com/api/health)
+          echo "Render Health Endpoint responded with HTTP status code: $STATUS_CODE"

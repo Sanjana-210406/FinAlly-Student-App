@@ -14,6 +14,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
+import org.springframework.transaction.annotation.Transactional;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
@@ -23,6 +25,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@Transactional
 @ActiveProfiles("test")
 public class BudgetControllerTest {
 
@@ -68,15 +71,28 @@ public class BudgetControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(req)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.savingsAllocation").value(1000)) // 10%
+                .andExpect(jsonPath("$.savingsTarget").value(1000)) // 10%
                 .andExpect(jsonPath("$.needsAllocation").value(5000))  // 50%
                 .andExpect(jsonPath("$.wantsAllocation").value(3000)); // 30%
     }
 
     @Test
-    void testGetCurrentBudgetFailsIfNotGenerated() throws Exception {
+    void testGetCurrentBudgetAutoGeneratesIfMissing() throws Exception {
+        RegisterRequest req = new RegisterRequest();
+        req.setName("No Budget User");
+        req.setEmail("nobudget@test.com");
+        req.setPassword("Password!123");
+        req.setGender(User.Gender.MALE);
+        req.setAge(21);
+        req.setMonthlyIncome(BigDecimal.ZERO);
+        req.setYearlyTarget(BigDecimal.ZERO);
+
+        AuthResponse resp = authService.register(req);
+        String noBudgetToken = resp.getToken();
+
         mockMvc.perform(get("/api/budget/current")
-                .header("Authorization", "Bearer " + token))
-                .andExpect(status().isBadRequest());
+                .header("Authorization", "Bearer " + noBudgetToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.totalIncome").value(5000)); // fallback value
     }
 }
