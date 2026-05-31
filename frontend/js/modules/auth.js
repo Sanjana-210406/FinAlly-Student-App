@@ -20,10 +20,19 @@ const AuthModule = (() => {
     const btn     = document.getElementById('loginBtn');
     const txt     = document.getElementById('loginBtnText');
     const spinner = document.getElementById('loginSpinner');
+    const wake    = document.getElementById('wakeupMsg');
     if (!btn) return;
     btn.disabled = loading;
     if (txt)     txt.textContent = loading ? 'Signing in…' : 'Sign In';
     if (spinner) spinner.classList.toggle('hidden', !loading);
+    if (wake) {
+      if (!loading) {
+        wake.classList.add('hidden');
+        if (wake._timer) { clearTimeout(wake._timer); wake._timer = null; }
+      } else {
+        wake._timer = setTimeout(() => wake.classList.remove('hidden'), 4000);
+      }
+    }
   };
 
   const login = async (email, password) => {
@@ -31,7 +40,7 @@ const AuthModule = (() => {
 
     // Validate
     let valid = true;
-    if (!email || !/\S+@\S+\.\S+/.test(email)) {
+    if (!email || !/\S+@\S+/.test(email)) {
       document.getElementById('loginEmail')?.classList.add('error');
       document.getElementById('emailError')?.classList.add('show');
       valid = false;

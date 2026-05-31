@@ -14,7 +14,7 @@ const API_BASE = localStorage.getItem('api_base') || (isLocal ? 'http://localhos
 const ApiUtil = (() => {
 
   // ── Core fetch wrapper ─────────────────────────────────────
-  async function request(method, endpoint, body = null, requiresAuth = true) {
+  async function request(method, endpoint, body = null, requiresAuth = true, timeoutMs = 65000) {
     const headers = { 'Content-Type': 'application/json' };
     if (requiresAuth) {
       const token = StorageUtil.getToken();
@@ -28,7 +28,22 @@ const ApiUtil = (() => {
     const config = { method, headers };
     if (body) config.body = JSON.stringify(body);
 
-    const res = await fetch(`${API_BASE}${endpoint}`, config);
+    // Abort controller for timeout
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
+    config.signal = controller.signal;
+
+    let res;
+    try {
+      res = await fetch(`${API_BASE}${endpoint}`, config);
+    } catch (err) {
+      clearTimeout(timer);
+      if (err.name === 'AbortError') {
+        throw new Error('Request timed out. The server may be waking up — please try again.');
+      }
+      throw new Error('Network error. Please check your connection.');
+    }
+    clearTimeout(timer);
 
     if (res.status === 401) {
       StorageUtil.clear();
